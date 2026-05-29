@@ -1,0 +1,33 @@
+<% content_for :title, "Kizuna Sound" %>
+
+<h1 class="text-2xl font-semibold mb-6">Sounds</h1>
+
+<% if @sounds.any? %>
+  <ul class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white">
+    <% @sounds.each do |sound| %>
+      <li class="flex items-center justify-between px-4 py-3">
+        <div>
+          <%= link_to sound.title,
+                rails_blob_path(sound.audio, disposition: "attachment"),
+                class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+          <p class="text-xs text-gray-500">
+            Uploaded <%= sound.created_at.strftime("%B %-d, %Y") %>
+          </p>
+        </div>
+
+        <% if logged_in? %>
+          <%= button_to "Delete", sound_path(sound), method: :delete,
+                form: { data: { turbo_confirm: "Delete “#{sound.title}”?" } },
+                class: "text-sm text-red-600 hover:text-red-800 cursor-pointer" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-gray-500">
+    No sounds yet.
+    <% if logged_in? %>
+      <%= link_to "Upload the first one", new_sound_path, class: "text-indigo-600 hover:text-indigo-800" %>.
+    <% end %>
+  </p>
+<% end %>
