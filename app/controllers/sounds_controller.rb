@@ -1,5 +1,5 @@
 class SoundsController < ApplicationController
-  before_action :require_admin, only: %i[new create destroy]
+  before_action :require_admin, only: %i[new create edit update destroy]
 
   def index
     @sounds = Sound.with_attached_audio.order(created_at: :desc)
@@ -16,6 +16,20 @@ class SoundsController < ApplicationController
       redirect_to root_path, notice: "“#{@sound.title}” was uploaded."
     else
       render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit
+    @sound = Sound.find(params[:id])
+  end
+
+  def update
+    @sound = Sound.find(params[:id])
+
+    if @sound.update(sound_params)
+      redirect_to root_path, notice: "“#{@sound.title}” was updated."
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 

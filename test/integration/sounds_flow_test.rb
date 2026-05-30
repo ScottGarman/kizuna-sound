@@ -58,6 +58,67 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "edit form requires login" do
+    log_in
+    post sounds_path, params: { sound: { title: "Editable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    get edit_sound_path(sound)
+    assert_redirected_to login_path
+  end
+
+  test "update requires login" do
+    log_in
+    post sounds_path, params: { sound: { title: "Editable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    patch sound_path(sound), params: { sound: { title: "Hacked" } }
+    assert_redirected_to login_path
+    assert_equal "Editable", sound.reload.title
+  end
+
+  test "admin can edit a sound's title without replacing the audio" do
+    log_in
+    post sounds_path, params: { sound: { title: "Old Title", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    original_blob_id = sound.audio.blob.id
+
+    patch sound_path(sound), params: { sound: { title: "New Title" } }
+    assert_redirected_to root_path
+
+    sound.reload
+    assert_equal "New Title", sound.title
+    assert sound.audio.attached?
+    assert_equal original_blob_id, sound.audio.blob.id
+  end
+
+  test "admin can replace the audio file when editing" do
+    log_in
+    post sounds_path, params: { sound: { title: "Replace Me", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    original_blob_id = sound.audio.blob.id
+
+    replacement = fixture_file_upload("sample.wav", "audio/wav")
+    patch sound_path(sound), params: { sound: { title: "Replace Me", audio: replacement } }
+    assert_redirected_to root_path
+
+    sound.reload
+    assert sound.audio.attached?
+    assert_not_equal original_blob_id, sound.audio.blob.id
+  end
+
+  test "update rejects a blank title" do
+    log_in
+    post sounds_path, params: { sound: { title: "Keep me valid", audio: @audio } }
+    sound = Sound.order(:created_at).last
+
+    patch sound_path(sound), params: { sound: { title: "" } }
+    assert_response :unprocessable_entity
+    assert_equal "Keep me valid", sound.reload.title
+  end
+
   test "admin can delete a sound" do
     log_in
     post sounds_path, params: { sound: { title: "To delete", audio: @audio } }
