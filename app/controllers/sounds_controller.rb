@@ -5,6 +5,10 @@ class SoundsController < ApplicationController
     @sounds = Sound.with_attached_audio.order(created_at: :desc)
   end
 
+  def show
+    @sound = Sound.find(params[:id])
+  end
+
   def new
     @sound = Sound.new
   end

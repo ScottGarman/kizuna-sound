@@ -14,8 +14,8 @@ Rails.application.routes.draw do
   post   "login",  to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
-  # The public feed plus admin-only upload/edit/delete.
-  resources :sounds, only: %i[index new create edit update destroy]
+  # The public feed and per-sound page, plus admin-only upload/edit/delete.
+  resources :sounds, only: %i[index show new create edit update destroy]
 
   # Defines the root path route ("/")
   root "sounds#index"

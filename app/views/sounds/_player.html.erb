@@ -1,0 +1,27 @@
+<div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3"
+     data-controller="waveform"
+     data-waveform-url-value="<%= rails_blob_path(sound.audio) %>">
+  <div class="flex items-center gap-3">
+    <button type="button"
+            data-waveform-target="playPause"
+            data-action="waveform#togglePlay"
+            class="w-20 shrink-0 rounded-md bg-indigo-600 px-3 py-1.5 text-center text-sm font-medium text-white hover:bg-indigo-700 cursor-pointer">
+      Play
+    </button>
+    <div data-waveform-target="waveform" class="min-w-0 flex-1"></div>
+  </div>
+
+  <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
+    <span data-waveform-target="time">0:00 / 0:00</span>
+    <label class="flex items-center gap-1">
+      Speed
+      <%= select_tag "speed",
+            options_for_select(
+              [["0.5×", "0.5"], ["0.75×", "0.75"], ["1×", "1"],
+               ["1.25×", "1.25"], ["1.5×", "1.5"], ["2×", "2"]],
+              "1"),
+            data: { waveform_target: "speed", action: "waveform#changeSpeed" },
+            class: "rounded border border-gray-300 bg-white px-1 py-0.5 text-xs" %>
+    </label>
+  </div>
+</div>
