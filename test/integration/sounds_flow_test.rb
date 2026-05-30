@@ -58,6 +58,31 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
+  test "sound show page is public and renders the waveform player" do
+    log_in
+    post sounds_path, params: { sound: { title: "Playable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    get sound_path(sound)
+    assert_response :success
+    assert_select "h1", text: "Playable"
+    # The player partial wires up the waveform Stimulus controller with the blob URL.
+    assert_select "[data-controller='waveform'][data-waveform-url-value=?]",
+                  rails_blob_path(sound.audio)
+  end
+
+  test "feed links each sound title to its show page" do
+    log_in
+    post sounds_path, params: { sound: { title: "Linkable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    get root_path
+    assert_response :success
+    assert_select "a[href=?]", sound_path(sound), text: "Linkable"
+  end
+
   test "edit form requires login" do
     log_in
     post sounds_path, params: { sound: { title: "Editable", audio: @audio } }
