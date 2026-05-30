@@ -5,3 +5,4 @@ pin "@hotwired/turbo-rails", to: "turbo.min.js"
 pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 pin_all_from "app/javascript/controllers", under: "controllers"
+pin "wavesurfer.js", to: "wavesurfer.js" # @7.12.7, vendored in vendor/javascript
