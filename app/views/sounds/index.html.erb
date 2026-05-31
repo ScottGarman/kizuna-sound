@@ -2,6 +2,27 @@
 
 <h1 class="text-2xl font-semibold mb-6">Sounds</h1>
 
+<% if @tags.any? %>
+  <div class="mb-6 rounded-md border border-gray-200 bg-white px-4 py-3">
+    <p class="mb-2 text-sm font-medium text-gray-700">Browse by tag</p>
+    <div class="flex flex-wrap gap-2">
+      <% @tags.each do |tag| %>
+        <%= link_to root_path(tag: tag.name),
+              class: "rounded-full border px-3 py-1 text-sm #{@active_tag&.id == tag.id ? "border-indigo-600 bg-indigo-600 text-white" : "border-gray-300 text-gray-700 hover:bg-gray-100"}" do %>
+          <%= tag.name %> <span class="text-xs opacity-75">(<%= tag.sounds_count %>)</span>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @active_tag %>
+  <p class="mb-4 flex items-center gap-2 text-sm text-gray-600">
+    Showing sounds tagged <span class="font-medium">“<%= @active_tag.name %>”</span>
+    <%= link_to "Clear filter", root_path, class: "text-indigo-600 hover:text-indigo-800" %>
+  </p>
+<% end %>
+
 <% if @sounds.any? %>
   <ul class="divide-y divide-gray-200 rounded-md border border-gray-200 bg-white">
     <% @sounds.each do |sound| %>
@@ -32,6 +53,8 @@
       </li>
     <% end %>
   </ul>
+<% elsif @active_tag %>
+  <p class="text-gray-500">No sounds tagged “<%= @active_tag.name %>”.</p>
 <% else %>
   <p class="text-gray-500">
     No sounds yet.

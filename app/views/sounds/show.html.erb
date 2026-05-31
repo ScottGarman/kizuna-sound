@@ -21,6 +21,16 @@
 
   <%= render "player", sound: @sound %>
 
+  <% if @sound.tags.any? %>
+    <div class="mt-4 flex flex-wrap items-center gap-2">
+      <span class="text-sm text-gray-500">Tags:</span>
+      <% @sound.tags.order(:name).each do |tag| %>
+        <%= link_to tag.name, root_path(tag: tag.name),
+              class: "rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-100" %>
+      <% end %>
+    </div>
+  <% end %>
+
   <p class="mt-6">
     <%= link_to "← Back to all sounds", root_path,
           class: "text-sm text-indigo-600 hover:text-indigo-800" %>
