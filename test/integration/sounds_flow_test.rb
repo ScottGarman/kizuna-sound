@@ -154,4 +154,66 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to root_path
   end
+
+  test "uploading with new tag names creates and attaches normalized tags" do
+    log_in
+    post sounds_path, params: {
+      sound: { title: "Tagged", audio: @audio, new_tag_names: "Ambient, Field Recording" }
+    }
+    sound = Sound.order(:created_at).last
+    assert_equal ["ambient", "field recording"], sound.tags.order(:name).pluck(:name)
+  end
+
+  test "uploading reuses an existing tag instead of duplicating it" do
+    existing = Tag.create!(name: "ambient")
+    log_in
+    assert_no_difference -> { Tag.where(name: "ambient").count } do
+      post sounds_path, params: {
+        sound: { title: "Reuse", audio: @audio, tag_ids: [existing.id], new_tag_names: "ambient" }
+      }
+    end
+    sound = Sound.order(:created_at).last
+    assert_equal [existing.id], sound.tag_ids
+  end
+
+  test "editing can add an existing tag via checkboxes" do
+    log_in
+    post sounds_path, params: { sound: { title: "Editable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    tag = Tag.create!(name: "rain")
+
+    patch sound_path(sound), params: { sound: { title: "Editable", tag_ids: [tag.id] } }
+    assert_redirected_to root_path
+    assert_equal ["rain"], sound.reload.tags.pluck(:name)
+  end
+
+  test "feed lists in-use tags with counts and filters by a tag" do
+    log_in
+    post sounds_path, params: { sound: { title: "Rainy", audio: @audio, new_tag_names: "rain" } }
+    post sounds_path, params: { sound: { title: "Windy", audio: @audio, new_tag_names: "wind" } }
+    rainy = Sound.find_by!(title: "Rainy")
+    reset!
+
+    # The global tag list shows each in-use tag with its count.
+    get root_path
+    assert_response :success
+    assert_select "a[href=?]", root_path(tag: "rain"), text: /rain/
+
+    # Filtering narrows the feed to sounds carrying that tag.
+    get root_path(tag: "rain")
+    assert_response :success
+    assert_select "a[href=?]", sound_path(rainy), text: "Rainy"
+    assert_select "a", text: "Windy", count: 0
+    assert_select "a", text: "Clear filter"
+  end
+
+  test "filtering by an unknown tag yields no sounds" do
+    log_in
+    post sounds_path, params: { sound: { title: "Solo", audio: @audio, new_tag_names: "rain" } }
+    reset!
+
+    get root_path(tag: "nonexistent")
+    assert_response :success
+    assert_select "a", text: "Solo", count: 0
+  end
 end
