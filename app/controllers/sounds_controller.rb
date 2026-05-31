@@ -1,8 +1,17 @@
 class SoundsController < ApplicationController
   before_action :require_admin, only: %i[new create edit update destroy]
+  before_action :load_all_tags, only: %i[new create edit update]
 
   def index
-    @sounds = Sound.with_attached_audio.order(created_at: :desc)
+    @sounds = Sound.with_attached_audio.includes(:tags).order(created_at: :desc)
+
+    if params[:tag].present?
+      @active_tag = Tag.find_by(name: Tag.normalize(params[:tag]))
+      @sounds = @active_tag ? @sounds.joins(:taggings).where(taggings: { tag_id: @active_tag.id }) : Sound.none
+    end
+
+    # Tags that are actually in use (inner join), with a count for the filter list.
+    @tags = Tag.joins(:taggings).group("tags.id").order(:name).select("tags.*, COUNT(taggings.id) AS sounds_count")
   end
 
   def show
@@ -46,6 +55,10 @@ class SoundsController < ApplicationController
   private
 
   def sound_params
-    params.require(:sound).permit(:title, :audio)
+    params.require(:sound).permit(:title, :audio, :new_tag_names, tag_ids: [])
+  end
+
+  def load_all_tags
+    @all_tags = Tag.order(:name)
   end
 end
