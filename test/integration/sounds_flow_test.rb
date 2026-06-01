@@ -161,7 +161,7 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
       sound: { title: "Tagged", audio: @audio, new_tag_names: "Ambient, Field Recording" }
     }
     sound = Sound.order(:created_at).last
-    assert_equal ["ambient", "field recording"], sound.tags.order(:name).pluck(:name)
+    assert_equal [ "ambient", "field recording" ], sound.tags.order(:name).pluck(:name)
   end
 
   test "uploading reuses an existing tag instead of duplicating it" do
@@ -169,11 +169,11 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     log_in
     assert_no_difference -> { Tag.where(name: "ambient").count } do
       post sounds_path, params: {
-        sound: { title: "Reuse", audio: @audio, tag_ids: [existing.id], new_tag_names: "ambient" }
+        sound: { title: "Reuse", audio: @audio, tag_ids: [ existing.id ], new_tag_names: "ambient" }
       }
     end
     sound = Sound.order(:created_at).last
-    assert_equal [existing.id], sound.tag_ids
+    assert_equal [ existing.id ], sound.tag_ids
   end
 
   test "editing can add an existing tag via checkboxes" do
@@ -182,9 +182,9 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     sound = Sound.order(:created_at).last
     tag = Tag.create!(name: "rain")
 
-    patch sound_path(sound), params: { sound: { title: "Editable", tag_ids: [tag.id] } }
+    patch sound_path(sound), params: { sound: { title: "Editable", tag_ids: [ tag.id ] } }
     assert_redirected_to root_path
-    assert_equal ["rain"], sound.reload.tags.pluck(:name)
+    assert_equal [ "rain" ], sound.reload.tags.pluck(:name)
   end
 
   test "feed lists in-use tags with counts and filters by a tag" do
