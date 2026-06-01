@@ -17,6 +17,10 @@ Rails.application.routes.draw do
   # The public feed and per-sound page, plus admin-only upload/edit/delete.
   resources :sounds, only: %i[index show new create edit update destroy]
 
+  # Admin-only global site settings (singleton). The :update action is added
+  # alongside the first editable setting.
+  resource :settings, only: %i[show]
+
   # Defines the root path route ("/")
   root "sounds#index"
 end
