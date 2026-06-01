@@ -45,4 +45,32 @@ class SettingsFlowTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: "Sounds"
     assert_select "title", text: "Kizuna Sound"
   end
+
+  test "admin can set the about text and it appears on the feed" do
+    log_in
+    patch settings_path, params: { setting: { about: "Field recordings from my travels." } }
+    assert_redirected_to settings_path
+    assert_equal "Field recordings from my travels.", Setting.current.about
+
+    get root_path
+    assert_response :success
+    assert_select "p", text: "Field recordings from my travels."
+  end
+
+  test "about text is not rendered when blank" do
+    Setting.delete_all
+    Setting.create!(about: "")
+    get root_path
+    assert_response :success
+    assert_select "header p", count: 0
+  end
+
+  test "about text is HTML-escaped, not injected as markup" do
+    log_in
+    patch settings_path, params: { setting: { about: "<script>alert('x')</script>" } }
+
+    get root_path
+    assert_response :success
+    assert_not_includes response.body, "<script>alert('x')</script>"
+  end
 end

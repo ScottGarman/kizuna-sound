@@ -24,6 +24,15 @@
       </p>
     </div>
 
+    <div>
+      <%= form.label :about, "About", class: "block text-sm font-medium mb-1" %>
+      <%= form.text_area :about, rows: 5,
+            class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" %>
+      <p class="mt-1 text-xs text-gray-500">
+        A short description shown on your main feed, below the title. Line breaks are preserved.
+      </p>
+    </div>
+
     <div class="flex items-center gap-3">
       <%= form.submit "Save settings",
             class: "rounded-md bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 cursor-pointer" %>

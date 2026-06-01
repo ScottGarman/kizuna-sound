@@ -20,6 +20,6 @@ class SettingsController < ApplicationController
   end
 
   def setting_params
-    params.require(:setting).permit(:title)
+    params.require(:setting).permit(:title, :about)
   end
 end
