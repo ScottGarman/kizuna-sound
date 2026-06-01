@@ -5,13 +5,18 @@ class SoundsController < ApplicationController
   def index
     @sounds = Sound.with_attached_audio.includes(:tags).order(created_at: :desc)
 
-    if params[:tag].present?
-      @active_tag = Tag.find_by(name: Tag.normalize(params[:tag]))
-      @sounds = @active_tag ? @sounds.joins(:taggings).where(taggings: { tag_id: @active_tag.id }) : Sound.none
-    end
+    # All tag features are off when the admin disables tags: no filtering (even
+    # via a stray ?tag= URL) and no tag list. @active_tag/@tags stay nil and the
+    # views skip every tag surface accordingly.
+    if site_settings.tags_enabled?
+      if params[:tag].present?
+        @active_tag = Tag.find_by(name: Tag.normalize(params[:tag]))
+        @sounds = @active_tag ? @sounds.joins(:taggings).where(taggings: { tag_id: @active_tag.id }) : Sound.none
+      end
 
-    # Tags that are actually in use (inner join), with a count for the filter list.
-    @tags = Tag.joins(:taggings).group("tags.id").order(:name).select("tags.*, COUNT(taggings.id) AS sounds_count")
+      # Tags that are actually in use (inner join), with a count for the filter list.
+      @tags = Tag.joins(:taggings).group("tags.id").order(:name).select("tags.*, COUNT(taggings.id) AS sounds_count")
+    end
   end
 
   def show

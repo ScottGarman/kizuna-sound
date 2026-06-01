@@ -19,4 +19,9 @@ class SettingTest < ActiveSupport::TestCase
   test "site_title uses the configured title when present" do
     assert_equal "My Sound Collection", Setting.new(title: "My Sound Collection").site_title
   end
+
+  test "tags are enabled by default" do
+    assert Setting.new.tags_enabled?
+    assert Setting.current.tags_enabled?
+  end
 end

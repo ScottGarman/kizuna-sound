@@ -57,6 +57,17 @@
             class: "mt-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" %>
     </div>
 
+    <div>
+      <label class="flex items-center gap-2 text-sm font-medium">
+        <%= form.check_box :tags_enabled, class: "rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+        Enable tags
+      </label>
+      <p class="mt-1 text-xs text-gray-500">
+        When enabled, you can tag sounds and visitors can filter the feed by tag. When off, all
+        tag controls are hidden (your existing tags are kept and reappear if you turn this back on).
+      </p>
+    </div>
+
     <div class="flex items-center gap-3">
       <%= form.submit "Save settings",
             class: "rounded-md bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 cursor-pointer" %>

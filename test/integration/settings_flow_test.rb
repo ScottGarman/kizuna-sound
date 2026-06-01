@@ -3,6 +3,7 @@ require "test_helper"
 class SettingsFlowTest < ActionDispatch::IntegrationTest
   setup do
     @admin = users(:admin)
+    @audio = fixture_file_upload("sample.wav", "audio/wav")
   end
 
   def log_in
@@ -124,5 +125,43 @@ class SettingsFlowTest < ActionDispatch::IntegrationTest
       }
     end
     assert_redirected_to settings_path
+  end
+
+  test "admin can disable tags" do
+    log_in
+    patch settings_path, params: { setting: { tags_enabled: "0" } }
+    assert_redirected_to settings_path
+    assert_not Setting.current.tags_enabled?
+  end
+
+  test "disabling tags hides the browse-by-tag panel and ignores tag filtering" do
+    log_in
+    post sounds_path, params: { sound: { title: "Rainy", audio: @audio, new_tag_names: "rain" } }
+    post sounds_path, params: { sound: { title: "Windy", audio: @audio, new_tag_names: "wind" } }
+    Setting.create!(tags_enabled: false)
+    reset!
+
+    get root_path
+    assert_response :success
+    assert_select "*", text: /Browse by tag/, count: 0
+
+    # A stray ?tag= URL no longer filters: every sound still shows.
+    get root_path(tag: "rain")
+    assert_response :success
+    assert_select "a", text: "Rainy"
+    assert_select "a", text: "Windy"
+    assert_select "a", text: "Clear filter", count: 0
+  end
+
+  test "disabling tags hides tags on the sound show page" do
+    log_in
+    post sounds_path, params: { sound: { title: "Tagged", audio: @audio, new_tag_names: "rain" } }
+    sound = Sound.order(:created_at).last
+    Setting.create!(tags_enabled: false)
+    reset!
+
+    get sound_path(sound)
+    assert_response :success
+    assert_select "*", text: /Tags:/, count: 0
   end
 end

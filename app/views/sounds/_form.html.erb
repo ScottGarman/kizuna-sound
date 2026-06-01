@@ -30,6 +30,7 @@
     <% end %>
   </div>
 
+  <% if site_settings.tags_enabled? %>
   <div>
     <span class="block text-sm font-medium mb-1">Tags</span>
 
@@ -51,6 +52,7 @@
           class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" %>
     <p class="mt-1 text-xs text-gray-500">Separate multiple tags with commas.</p>
   </div>
+  <% end %>
 
   <div class="flex items-center gap-3">
     <%= form.submit submit_label,

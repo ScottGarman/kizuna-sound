@@ -21,7 +21,7 @@ class SettingsController < ApplicationController
 
   def setting_params
     params.require(:setting).permit(
-      :title, :about,
+      :title, :about, :tags_enabled,
       links_attributes: %i[id title url _destroy]
     )
   end

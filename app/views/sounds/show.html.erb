@@ -21,7 +21,7 @@
 
   <%= render "player", sound: @sound %>
 
-  <% if @sound.tags.any? %>
+  <% if site_settings.tags_enabled? && @sound.tags.any? %>
     <div class="mt-4 flex flex-wrap items-center gap-2">
       <span class="text-sm text-gray-500">Tags:</span>
       <% @sound.tags.order(:name).each do |tag| %>
