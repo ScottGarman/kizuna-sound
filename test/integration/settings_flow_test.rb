@@ -86,7 +86,7 @@ class SettingsFlowTest < ActionDispatch::IntegrationTest
       }
     }
     assert_redirected_to settings_path
-    assert_equal ["Bandcamp", "Newsletter"], Setting.current.links.pluck(:title)
+    assert_equal [ "Bandcamp", "Newsletter" ], Setting.current.links.pluck(:title)
 
     get root_path
     assert_response :success
