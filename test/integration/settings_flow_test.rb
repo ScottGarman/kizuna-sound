@@ -73,4 +73,56 @@ class SettingsFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_not_includes response.body, "<script>alert('x')</script>"
   end
+
+  test "admin can add links and they appear on the feed opening in a new tab" do
+    log_in
+    patch settings_path, params: {
+      setting: {
+        links_attributes: {
+          "0" => { title: "Bandcamp", url: "https://example.bandcamp.com" },
+          "1" => { title: "Newsletter", url: "https://example.com/news" }
+        }
+      }
+    }
+    assert_redirected_to settings_path
+    assert_equal ["Bandcamp", "Newsletter"], Setting.current.links.pluck(:title)
+
+    get root_path
+    assert_response :success
+    assert_select "header a[href='https://example.bandcamp.com'][target='_blank'][rel='noopener']",
+                  text: "Bandcamp"
+  end
+
+  test "blank link rows are dropped" do
+    log_in
+    assert_no_difference "Link.count" do
+      patch settings_path, params: {
+        setting: { links_attributes: { "0" => { title: "", url: "" } } }
+      }
+    end
+    assert_redirected_to settings_path
+  end
+
+  test "a link with a dangerous url scheme is rejected" do
+    log_in
+    assert_no_difference "Link.count" do
+      patch settings_path, params: {
+        setting: { links_attributes: { "0" => { title: "Bad", url: "javascript:alert(1)" } } }
+      }
+    end
+    assert_response :unprocessable_entity
+  end
+
+  test "admin can remove an existing link" do
+    log_in
+    setting = Setting.create!
+    link = setting.links.create!(title: "Old", url: "https://old.example")
+
+    assert_difference "Link.count", -1 do
+      patch settings_path, params: {
+        setting: { links_attributes: { "0" => { id: link.id, _destroy: "1" } } }
+      }
+    end
+    assert_redirected_to settings_path
+  end
 end

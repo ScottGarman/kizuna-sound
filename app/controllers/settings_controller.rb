@@ -20,6 +20,9 @@ class SettingsController < ApplicationController
   end
 
   def setting_params
-    params.require(:setting).permit(:title, :about)
+    params.require(:setting).permit(
+      :title, :about,
+      links_attributes: %i[id title url _destroy]
+    )
   end
 end

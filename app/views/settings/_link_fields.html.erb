@@ -1,0 +1,17 @@
+<%# One editable link row (title + URL) with a remove button. Shared by the
+    existing rows and the "add link" <template>. `form` is a fields_for builder. %>
+<div class="flex items-start gap-2" data-nested-form-target="row">
+  <div class="flex-1">
+    <%= form.text_field :title, placeholder: "Label (e.g. Bandcamp)",
+          "aria-label": "Link label",
+          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <div class="flex-1">
+    <%= form.url_field :url, placeholder: "https://…",
+          "aria-label": "Link URL",
+          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" %>
+  </div>
+  <%= form.hidden_field :_destroy %>
+  <%= button_tag "Remove", type: "button", data: { action: "nested-form#remove" },
+        class: "shrink-0 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 cursor-pointer" %>
+</div>

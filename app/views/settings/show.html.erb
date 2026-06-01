@@ -33,6 +33,30 @@
       </p>
     </div>
 
+    <div data-controller="nested-form">
+      <span class="block text-sm font-medium mb-1">Links</span>
+      <p class="mb-2 text-xs text-gray-500">
+        Shown on your main feed, below the About section. Each link has a label and a URL.
+      </p>
+
+      <div data-nested-form-target="rows" class="space-y-2">
+        <%= form.fields_for :links do |link_fields| %>
+          <%= render "link_fields", form: link_fields %>
+        <% end %>
+      </div>
+
+      <%# Hidden blueprint for new rows. child_index: "NEW_RECORD" is swapped for
+          a unique value by the Stimulus controller when a row is added. %>
+      <template data-nested-form-target="template">
+        <%= form.fields_for :links, Link.new, child_index: "NEW_RECORD" do |link_fields| %>
+          <%= render "link_fields", form: link_fields %>
+        <% end %>
+      </template>
+
+      <%= button_tag "+ Add link", type: "button", data: { action: "nested-form#add" },
+            class: "mt-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer" %>
+    </div>
+
     <div class="flex items-center gap-3">
       <%= form.submit "Save settings",
             class: "rounded-md bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 cursor-pointer" %>
