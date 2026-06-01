@@ -68,6 +68,40 @@
       </p>
     </div>
 
+    <div>
+      <%= form.label :banner, "Banner image", class: "block text-sm font-medium mb-1" %>
+
+      <% if @setting.banner.attached? && @setting.banner.blob.persisted? %>
+        <%= image_tag @setting.banner, class: "mb-2 h-24 w-full rounded-md border border-gray-200 object-cover" %>
+        <label class="mb-2 flex items-center gap-2 text-sm text-gray-700">
+          <%= form.check_box :remove_banner, { checked: false }, "1", "0" %>
+          Remove current banner
+        </label>
+      <% end %>
+
+      <%= form.file_field :banner, accept: "image/png,image/jpeg,image/gif,image/webp",
+            class: "block w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-indigo-700 hover:file:bg-indigo-100" %>
+      <p class="mt-1 text-xs text-gray-500">
+        Shown behind the title and about text on your main feed. A wide (rectangular) image works best.
+        Accepted formats: PNG, JPEG, GIF, WebP.
+      </p>
+
+      <fieldset class="mt-3">
+        <legend class="text-sm font-medium mb-1">Overlay style</legend>
+        <p class="mb-2 text-xs text-gray-500">Keeps the title and about text readable over your banner.</p>
+        <div class="space-y-1">
+          <% { "light" => "Optimized for light images",
+               "dark" => "Optimized for dark images",
+               "none" => "No overlay" }.each do |value, label| %>
+            <label class="flex items-center gap-2 text-sm">
+              <%= form.radio_button :banner_overlay, value, class: "border-gray-300 text-indigo-600 focus:ring-indigo-500" %>
+              <%= label %>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+    </div>
+
     <div class="flex items-center gap-3">
       <%= form.submit "Save settings",
             class: "rounded-md bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700 cursor-pointer" %>

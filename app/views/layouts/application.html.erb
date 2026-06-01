@@ -41,6 +41,9 @@
     </header>
 
     <main class="container mx-auto mt-10 px-5">
+      <%# Page-supplied header (e.g. the feed banner) renders above the flash. %>
+      <%= yield :header %>
+
       <% if notice %>
         <p class="mb-4 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800"><%= notice %></p>
       <% end %>

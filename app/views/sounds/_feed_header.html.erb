@@ -1,0 +1,23 @@
+<%# Title, about, and links for the feed header. Rendered both plain and over a
+    banner background (see index.html.erb). `site` is the current Setting;
+    `light_text` flips colors to light for a dark banner overlay. %>
+<% light_text = local_assigns.fetch(:light_text, false) %>
+
+<h1 class="text-2xl font-semibold <%= "text-white" if light_text %>"><%= site.site_title %></h1>
+
+<% if site.about.present? %>
+  <div class="mt-2 max-w-prose space-y-2 <%= light_text ? "text-gray-100" : "text-gray-600" %>">
+    <%= simple_format(site.about) %>
+  </div>
+<% end %>
+
+<% if site.links.any? %>
+  <ul class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+    <% site.links.each do |link| %>
+      <li>
+        <%= link_to link.title, link.url, target: "_blank", rel: "noopener",
+              class: light_text ? "text-indigo-200 hover:text-white" : "text-indigo-600 hover:text-indigo-800" %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

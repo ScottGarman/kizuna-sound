@@ -164,4 +164,78 @@ class SettingsFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "*", text: /Tags:/, count: 0
   end
+
+  test "admin can upload a banner and it appears behind the feed header" do
+    log_in
+    banner = fixture_file_upload("banner.png", "image/png")
+    patch settings_path, params: { setting: { banner: banner } }
+    assert_redirected_to settings_path
+    assert Setting.current.banner.attached?
+
+    get root_path
+    assert_response :success
+    # The header uses the uploaded banner as a background image.
+    assert_select "header[style*='background-image']"
+    assert_select "header[style*='/rails/active_storage/']"
+  end
+
+  test "uploading a non-image banner is rejected" do
+    log_in
+    bad = fixture_file_upload("not_audio.txt", "text/plain")
+    patch settings_path, params: { setting: { banner: bad } }
+    assert_response :unprocessable_entity
+    assert_not Setting.current.banner.attached?
+  end
+
+  test "dark overlay darkens the banner and uses light text" do
+    log_in
+    banner = fixture_file_upload("banner.png", "image/png")
+    patch settings_path, params: { setting: { banner: banner, banner_overlay: "dark" } }
+    assert_equal "dark", Setting.current.banner_overlay
+    reset!
+
+    get root_path
+    assert_response :success
+    assert_select "header div.bg-black\\/50"
+    assert_select "header h1.text-white"
+  end
+
+  test "none overlay renders no scrim" do
+    log_in
+    banner = fixture_file_upload("banner.png", "image/png")
+    patch settings_path, params: { setting: { banner: banner, banner_overlay: "none" } }
+    reset!
+
+    get root_path
+    assert_response :success
+    assert_select "header div.bg-white\\/70", count: 0
+    assert_select "header div.bg-black\\/50", count: 0
+  end
+
+  test "flash messages render below the banner on the feed" do
+    log_in
+    banner = fixture_file_upload("banner.png", "image/png")
+    patch settings_path, params: { setting: { banner: banner } }
+
+    # Uploading a sound redirects to the feed with a flash notice.
+    post sounds_path, params: { sound: { title: "Hi", audio: @audio } }
+    follow_redirect!
+    assert_response :success
+
+    banner_pos = response.body.index("background-image")
+    flash_pos = response.body.index("was uploaded")
+    assert banner_pos, "expected the banner to render"
+    assert flash_pos, "expected the flash notice to render"
+    assert banner_pos < flash_pos, "expected the banner to appear above the flash message"
+  end
+
+  test "admin can remove the banner" do
+    log_in
+    setting = Setting.create!
+    setting.banner.attach(io: file_fixture("banner.png").open, filename: "banner.png", content_type: "image/png")
+
+    patch settings_path, params: { setting: { remove_banner: "1" } }
+    assert_redirected_to settings_path
+    assert_not Setting.current.banner.attached?
+  end
 end
