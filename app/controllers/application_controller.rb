@@ -5,12 +5,17 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  helper_method :current_user, :logged_in?
+  helper_method :current_user, :logged_in?, :site_settings
 
   private
 
   def current_user
     @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+  end
+
+  # The singleton global site settings, available to every view.
+  def site_settings
+    @site_settings ||= Setting.current
   end
 
   def logged_in?

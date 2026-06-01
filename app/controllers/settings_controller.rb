@@ -5,9 +5,21 @@ class SettingsController < ApplicationController
   def show
   end
 
+  def update
+    if @setting.update(setting_params)
+      redirect_to settings_path, notice: "Settings saved."
+    else
+      render :show, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def set_setting
     @setting = Setting.current
+  end
+
+  def setting_params
+    params.require(:setting).permit(:title)
   end
 end

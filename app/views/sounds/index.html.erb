@@ -1,6 +1,6 @@
-<% content_for :title, "Kizuna Sound" %>
+<% content_for :title, site_settings.title if site_settings.title.present? %>
 
-<h1 class="text-2xl font-semibold mb-6">Sounds</h1>
+<h1 class="text-2xl font-semibold mb-6"><%= site_settings.site_title %></h1>
 
 <% if @tags.any? %>
   <div class="mb-6 rounded-md border border-gray-200 bg-white px-4 py-3">

@@ -20,4 +20,29 @@ class SettingsFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Settings"
   end
+
+  test "update requires login" do
+    patch settings_path, params: { setting: { title: "Sneaky" } }
+    assert_redirected_to login_path
+  end
+
+  test "admin can set the site title and it appears on the feed" do
+    log_in
+    patch settings_path, params: { setting: { title: "My Sound Collection" } }
+    assert_redirected_to settings_path
+    assert_equal "My Sound Collection", Setting.current.title
+
+    get root_path
+    assert_response :success
+    assert_select "h1", text: "My Sound Collection"
+    assert_select "title", text: "My Sound Collection"
+  end
+
+  test "feed falls back to the default heading when no title is set" do
+    Setting.delete_all
+    get root_path
+    assert_response :success
+    assert_select "h1", text: "Sounds"
+    assert_select "title", text: "Kizuna Sound"
+  end
 end

@@ -1,17 +1,22 @@
 require "test_helper"
 
 class SettingTest < ActiveSupport::TestCase
-  test "current creates the singleton row when none exists" do
+  test "current returns an unpersisted record when none exists" do
     Setting.delete_all
-    assert_difference "Setting.count", 1 do
-      Setting.current
-    end
+    assert_not Setting.current.persisted?
   end
 
-  test "current reuses the existing row" do
-    first = Setting.current
-    assert_no_difference "Setting.count" do
-      assert_equal first, Setting.current
-    end
+  test "current returns the existing row when one exists" do
+    existing = Setting.create!
+    assert_equal existing, Setting.current
+  end
+
+  test "site_title falls back to a default when blank" do
+    assert_equal "Sounds", Setting.new(title: "").site_title
+    assert_equal "Sounds", Setting.new(title: nil).site_title
+  end
+
+  test "site_title uses the configured title when present" do
+    assert_equal "My Sound Collection", Setting.new(title: "My Sound Collection").site_title
   end
 end
