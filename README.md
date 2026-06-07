@@ -89,12 +89,67 @@ bin/rails test
 
 ## Deployment
 
-A [`Dockerfile`](Dockerfile) is included for building a production container
-image. Provide a persistent volume for SQLite and Active Storage, and set
-`ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `RAILS_MASTER_KEY` in the container
-environment.
+Kizuna Sound deploys as a Docker container using [Kamal](https://kamal-deploy.org/).
+Container images are built by GitHub Actions and published to the GitHub Container
+Registry (GHCR); Kamal pulls those images and runs them on your server.
 
-TODO: Add container-based deployment documentation.
+### How images are built
+
+[`.github/workflows/build.yml`](.github/workflows/build.yml) builds the image
+from the [`Dockerfile`](Dockerfile) and pushes it to
+`ghcr.io/scottgarman/kizuna-sound` on every merge to `main` (and on `v*` tags).
+Each build is tagged with the commit SHA (`sha-<commit>`), plus `latest` on
+`main` and a semver tag for releases. The package is public, so it can be pulled
+without authentication.
+
+### Persistent storage (important)
+
+All application state — the SQLite database, Solid Queue/Cache/Cable, and every
+uploaded audio file — lives under `storage/`. `config/deploy.yml` mounts this as
+a named volume (`kizuna_sound_storage:/rails/storage`) so it survives container
+replacement. **Back this volume up off-server**; losing it means losing the
+database and all uploads.
+
+### One-time setup
+
+1. Set your server host(s) in [`config/deploy.yml`](config/deploy.yml) under
+   `servers:`.
+2. Create a fine-grained GitHub PAT with `read:packages`. **Do not paste it into
+   `.kamal/secrets`** — that file is committed to git. Instead export it in your
+   environment (`export KAMAL_REGISTRY_PASSWORD=...`, or use a password manager)
+   and reference it in `.kamal/secrets` with `KAMAL_REGISTRY_PASSWORD=$KAMAL_REGISTRY_PASSWORD`,
+   matching how `RAILS_MASTER_KEY` is already referenced there.
+3. Ensure `config/master.key` exists locally (`.kamal/secrets` reads
+   `RAILS_MASTER_KEY` from it).
+4. Provision the server and deploy for the first time:
+
+   ```bash
+   bin/kamal setup
+   ```
+
+5. Seed the admin account on the server (one time):
+
+   ```bash
+   ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=a-strong-password \
+     bin/kamal app exec "bin/rails db:seed"
+   ```
+
+### Deploying updates
+
+After a merge to `main` has built a new image, deploy it from a clean checkout
+of that commit:
+
+```bash
+git checkout main && git pull
+bin/kamal deploy --skip-push   # pull the CI-built image and run it
+```
+
+`--skip-push` tells Kamal to use the image already in GHCR rather than rebuilding
+locally; it pulls the image tagged with the current commit SHA. Deploy from a
+clean working tree so the SHA matches what CI published.
+
+Other useful commands: `bin/kamal rollback` (revert to the previous image),
+`bin/kamal app logs -f`, and `bin/kamal console`.
 
 ## License
 
