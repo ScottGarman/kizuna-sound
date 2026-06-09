@@ -36,3 +36,6 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+# Personal deployment destination overrides (machine-local, not for public repo)
+/config/deploy.*.yml
