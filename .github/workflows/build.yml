@@ -29,6 +29,10 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}
+          # Kamal requires a `service` label matching the service in config/deploy.yml;
+          # it adds this itself when it builds, but CI-built images must set it explicitly.
+          labels: |
+            service=kizuna_sound
           tags: |
             type=sha
             # Raw full-length SHA tag so `kamal deploy --skip-push` (which pulls
