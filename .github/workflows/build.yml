@@ -31,6 +31,9 @@ jobs:
           images: ghcr.io/${{ github.repository }}
           tags: |
             type=sha
+            # Raw full-length SHA tag so `kamal deploy --skip-push` (which pulls
+            # image:<full-git-sha>) finds the image CI built for that commit.
+            type=sha,format=long,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}}
 
