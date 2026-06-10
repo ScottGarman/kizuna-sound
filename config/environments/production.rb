@@ -88,3 +88,8 @@ Rails.application.configure do
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end
+
+# Load environment-specific customizations kept out of this stock Rails file so that
+# framework upgrades to it stay conflict-free.
+custom = File.expand_path("production_custom.rb", __dir__)
+require custom if File.exist?(custom)
