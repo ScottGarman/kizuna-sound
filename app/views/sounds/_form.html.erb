@@ -17,6 +17,13 @@
   </div>
 
   <div>
+    <%= form.label :description, class: "block text-sm font-medium mb-1" %>
+    <%= form.text_area :description, rows: 4,
+          class: "block w-full rounded-md border border-gray-300 px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500" %>
+    <p class="mt-1 text-xs text-gray-500">Optional. A few sentences describing this sound.</p>
+  </div>
+
+  <div>
     <%= form.label :audio, "Audio file", class: "block text-sm font-medium mb-1" %>
     <%= form.file_field :audio, accept: "audio/wav,audio/mpeg,audio/flac,.wav,.mp3,.flac",
           class: "block w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-indigo-700 hover:file:bg-indigo-100" %>

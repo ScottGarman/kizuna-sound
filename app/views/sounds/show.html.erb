@@ -19,6 +19,12 @@
     Uploaded <%= @sound.created_at.strftime("%B %-d, %Y") %>
   </p>
 
+  <% if @sound.description.present? %>
+    <div class="mb-4 space-y-2 text-gray-700">
+      <%= simple_format(@sound.description) %>
+    </div>
+  <% end %>
+
   <%= render "player", sound: @sound %>
 
   <% if site_settings.tags_enabled? && @sound.tags.any? %>
