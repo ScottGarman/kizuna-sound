@@ -83,6 +83,44 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", sound_path(sound), text: "Linkable"
   end
 
+  test "admin can upload a sound with a description and see it on the show page" do
+    log_in
+    post sounds_path, params: {
+      sound: { title: "Described", audio: @audio, description: "A calm field recording.\nTaken at dawn." }
+    }
+    sound = Sound.order(:created_at).last
+    assert_equal "A calm field recording.\nTaken at dawn.", sound.description
+    reset!
+
+    get sound_path(sound)
+    assert_response :success
+    assert_select "h1", text: "Described"
+    assert_match "A calm field recording.", response.body
+  end
+
+  test "description appears in the feed" do
+    log_in
+    post sounds_path, params: {
+      sound: { title: "Feedable", audio: @audio, description: "Shown in the list." }
+    }
+    reset!
+
+    get root_path
+    assert_response :success
+    assert_match "Shown in the list.", response.body
+  end
+
+  test "admin can edit a sound's description" do
+    log_in
+    post sounds_path, params: { sound: { title: "Editable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    assert_nil sound.description
+
+    patch sound_path(sound), params: { sound: { title: "Editable", description: "Now it has detail." } }
+    assert_redirected_to root_path
+    assert_equal "Now it has detail.", sound.reload.description
+  end
+
   test "edit form requires login" do
     log_in
     post sounds_path, params: { sound: { title: "Editable", audio: @audio } }
