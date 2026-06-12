@@ -60,7 +60,7 @@ class SoundsController < ApplicationController
   private
 
   def sound_params
-    params.require(:sound).permit(:title, :audio, :new_tag_names, tag_ids: [])
+    params.require(:sound).permit(:title, :description, :audio, :new_tag_names, tag_ids: [])
   end
 
   def load_all_tags
