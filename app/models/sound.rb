@@ -1,6 +1,12 @@
 class Sound < ApplicationRecord
   ACCEPTED_CONTENT_TYPES = %w[audio/wav audio/x-wav audio/wave audio/mpeg audio/mp3 audio/flac audio/x-flac].freeze
 
+  extend FriendlyId
+  # Show pages live at /sounds/:slug (e.g. /sounds/midnight-rain) so the
+  # database id is never exposed. History keeps old slugs resolving after a
+  # title is edited, so previously shared links never break.
+  friendly_id :title, use: [ :slugged, :history ]
+
   belongs_to :user
   has_one_attached :audio
   has_many :taggings, dependent: :destroy
@@ -16,6 +22,12 @@ class Sound < ApplicationRecord
   attr_writer :new_tag_names
 
   after_save :attach_new_tags
+
+  # Refresh the slug when the title changes (and on create, when it's blank).
+  # The previous slug is preserved by :history so old links keep working.
+  def should_generate_new_friendly_id?
+    title_changed? || super
+  end
 
   private
 

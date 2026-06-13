@@ -157,6 +157,36 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     assert_equal original_blob_id, sound.audio.blob.id
   end
 
+  test "show page lives at a slug URL, not the database id" do
+    log_in
+    post sounds_path, params: { sound: { title: "Slugged Sound", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    assert_equal "/sounds/slugged-sound", sound_path(sound)
+    get "/sounds/slugged-sound"
+    assert_response :success
+    assert_select "h1", text: "Slugged Sound"
+  end
+
+  test "links shared before a title edit still resolve to the show page" do
+    log_in
+    post sounds_path, params: { sound: { title: "Before Edit", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    patch sound_path(sound), params: { sound: { title: "After Edit" } }
+    reset!
+
+    # The current slug works...
+    get "/sounds/after-edit"
+    assert_response :success
+    # ...and the previously shared one 301s to the canonical URL (FriendlyId history).
+    get "/sounds/before-edit"
+    assert_response :moved_permanently
+    assert_redirected_to "/sounds/after-edit"
+    follow_redirect!
+    assert_select "h1", text: "After Edit"
+  end
+
   test "admin can replace the audio file when editing" do
     log_in
     post sounds_path, params: { sound: { title: "Replace Me", audio: @audio } }
