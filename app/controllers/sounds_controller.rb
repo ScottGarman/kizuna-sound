@@ -1,6 +1,7 @@
 class SoundsController < ApplicationController
   before_action :require_admin, only: %i[new create edit update destroy]
   before_action :load_all_tags, only: %i[new create edit update]
+  before_action :set_sound, only: %i[show edit update destroy]
 
   def index
     @sounds = Sound.with_attached_audio.includes(:tags).order(created_at: :desc)
@@ -20,7 +21,6 @@ class SoundsController < ApplicationController
   end
 
   def show
-    @sound = Sound.find(params[:id])
   end
 
   def new
@@ -38,12 +38,9 @@ class SoundsController < ApplicationController
   end
 
   def edit
-    @sound = Sound.find(params[:id])
   end
 
   def update
-    @sound = Sound.find(params[:id])
-
     if @sound.update(sound_params)
       redirect_to root_path, notice: "“#{@sound.title}” was updated."
     else
@@ -52,12 +49,17 @@ class SoundsController < ApplicationController
   end
 
   def destroy
-    @sound = Sound.find(params[:id])
     @sound.destroy
     redirect_to root_path, notice: "“#{@sound.title}” was deleted."
   end
 
   private
+
+  # Look up by slug (FriendlyId). #friendly also resolves historical slugs, so
+  # links shared before a title edit still find the right sound.
+  def set_sound
+    @sound = Sound.friendly.find(params[:id])
+  end
 
   def sound_params
     params.require(:sound).permit(:title, :description, :audio, :new_tag_names, tag_ids: [])
