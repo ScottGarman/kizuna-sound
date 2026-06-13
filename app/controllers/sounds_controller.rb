@@ -21,6 +21,9 @@ class SoundsController < ApplicationController
   end
 
   def show
+    # If reached via an outdated slug (FriendlyId history), 301 to the canonical
+    # URL so search engines and shares consolidate on the current slug.
+    redirect_to sound_path(@sound), status: :moved_permanently if request.path != sound_path(@sound)
   end
 
   def new

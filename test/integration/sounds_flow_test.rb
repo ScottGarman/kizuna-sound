@@ -179,9 +179,11 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     # The current slug works...
     get "/sounds/after-edit"
     assert_response :success
-    # ...and so does the previously shared one, via FriendlyId history.
+    # ...and the previously shared one 301s to the canonical URL (FriendlyId history).
     get "/sounds/before-edit"
-    assert_response :success
+    assert_response :moved_permanently
+    assert_redirected_to "/sounds/after-edit"
+    follow_redirect!
     assert_select "h1", text: "After Edit"
   end
 
