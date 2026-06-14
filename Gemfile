@@ -43,7 +43,13 @@ gem "kamal", require: false
 gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
+# image_processing 2.0 made the image library a soft dependency, so name the
+# processor explicitly. We use libvips (Active Storage's default since Rails 7),
+# which is the library installed in the Dockerfile and CI. require: false lets
+# Active Storage load it on demand (as it did when it was a transitive dependency)
+# rather than at boot, so environments without libvips can still start.
+gem "ruby-vips", "~> 2.2", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
