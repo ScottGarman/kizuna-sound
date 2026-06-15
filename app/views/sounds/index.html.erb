@@ -56,7 +56,7 @@
               Uploaded <%= sound.created_at.strftime("%B %-d, %Y") %>
             </p>
             <% if sound.description.present? %>
-              <p class="mt-1 text-sm text-gray-600"><%= truncate(sound.description, length: 180) %></p>
+              <div class="mt-1 text-sm text-gray-600"><%= simple_format(sound.description) %></div>
             <% end %>
           </div>
 
