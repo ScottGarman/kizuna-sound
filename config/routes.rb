@@ -15,7 +15,11 @@ Rails.application.routes.draw do
   delete "logout", to: "sessions#destroy"
 
   # The public feed and per-sound page, plus admin-only upload/edit/delete.
-  resources :sounds, only: %i[index show new create edit update destroy]
+  resources :sounds, only: %i[index show new create edit update destroy] do
+    # Listeners POST here when wavesurfer fires its "finish" event, i.e. a sound
+    # was played all the way through. Public — no admin required.
+    member { post :play }
+  end
 
   # Admin-only global site settings (singleton).
   resource :settings, only: %i[show update]

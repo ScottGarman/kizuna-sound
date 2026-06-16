@@ -284,4 +284,41 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a", text: "Solo", count: 0
   end
+
+  test "the player partial carries the play-tracking URL" do
+    log_in
+    post sounds_path, params: { sound: { title: "Trackable", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    get sound_path(sound)
+    assert_response :success
+    assert_select "[data-controller='waveform'][data-waveform-play-url-value=?]",
+                  play_sound_path(sound)
+  end
+
+  test "posting to play increments the play count and is public" do
+    log_in
+    post sounds_path, params: { sound: { title: "Counted", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    assert_equal 0, sound.play_count
+    reset! # log out: full plays are counted for anonymous listeners too
+
+    assert_difference -> { sound.reload.play_count }, 1 do
+      post play_sound_path(sound)
+    end
+    assert_response :no_content
+  end
+
+  test "play is resolvable via the friendly slug" do
+    log_in
+    post sounds_path, params: { sound: { title: "Sluggy Play", audio: @audio } }
+    sound = Sound.order(:created_at).last
+    reset!
+
+    assert_difference -> { sound.reload.play_count }, 1 do
+      post "/sounds/sluggy-play/play"
+    end
+    assert_response :no_content
+  end
 end

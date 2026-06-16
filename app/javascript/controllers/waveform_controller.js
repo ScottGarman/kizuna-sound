@@ -10,7 +10,7 @@ import WaveSurfer from "wavesurfer.js"
 // feed doesn't fetch and decode every audio file up front.
 export default class extends Controller {
   static targets = ["waveform", "playPause", "time", "speed"]
-  static values = { url: String }
+  static values = { url: String, playUrl: String }
 
   connect() {
     this.observer = new IntersectionObserver((entries) => {
@@ -47,7 +47,23 @@ export default class extends Controller {
     this.wavesurfer.on("timeupdate", () => this.updateTime())
     this.wavesurfer.on("play", () => this.setPlaying(true))
     this.wavesurfer.on("pause", () => this.setPlaying(false))
-    this.wavesurfer.on("finish", () => this.setPlaying(false))
+    this.wavesurfer.on("finish", () => {
+      this.setPlaying(false)
+      this.recordPlay()
+    })
+  }
+
+  // The "finish" event only fires when playback reaches the end of the track, so
+  // this counts full plays and not partial listens. Fire-and-forget: a failed
+  // request just means an uncounted play, which shouldn't disrupt the listener.
+  recordPlay() {
+    if (!this.hasPlayUrlValue) return
+
+    const token = document.querySelector("meta[name='csrf-token']")?.content
+    fetch(this.playUrlValue, {
+      method: "POST",
+      headers: token ? { "X-CSRF-Token": token } : {}
+    }).catch(() => {})
   }
 
   togglePlay() {
