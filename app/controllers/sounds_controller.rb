@@ -1,7 +1,7 @@
 class SoundsController < ApplicationController
   before_action :require_admin, only: %i[new create edit update destroy]
   before_action :load_all_tags, only: %i[new create edit update]
-  before_action :set_sound, only: %i[show edit update destroy]
+  before_action :set_sound, only: %i[show edit update destroy play]
 
   def index
     @sounds = Sound.with_attached_audio.includes(:tags).order(created_at: :desc)
@@ -54,6 +54,15 @@ class SoundsController < ApplicationController
   def destroy
     @sound.destroy
     redirect_to root_path, notice: "“#{@sound.title}” was deleted."
+  end
+
+  # Records a completed play. Called by the waveform player's "finish" event, so
+  # only full playbacks count. increment_counter is a single atomic UPDATE, so
+  # concurrent plays don't clobber each other, and it skips validations,
+  # callbacks, and timestamp bumps.
+  def play
+    Sound.increment_counter(:play_count, @sound.id)
+    head :no_content
   end
 
   private
