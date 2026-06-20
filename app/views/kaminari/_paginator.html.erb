@@ -1,0 +1,15 @@
+<%# Tailwind-styled paginator. See https://github.com/kaminari/kaminari for the
+    full set of locals each partial receives. %>
+<%= paginator.render do -%>
+  <ul class="inline-flex items-center gap-1 text-sm">
+    <%= prev_page_tag unless current_page.first? %>
+    <% each_page do |page| -%>
+      <% if page.left_outer? || page.right_outer? || page.inside_window? -%>
+        <%= page_tag page %>
+      <% elsif !page.was_truncated? -%>
+        <%= gap_tag %>
+      <% end -%>
+    <% end -%>
+    <%= next_page_tag unless current_page.last? %>
+  </ul>
+<% end -%>
