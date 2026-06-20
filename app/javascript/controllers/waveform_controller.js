@@ -52,7 +52,7 @@ export default class extends Controller {
     // defer loading the audio until playback, so the feed draws without
     // downloading every file. wavesurfer expects one array of samples per
     // channel; our peaks are mono.
-    if (this.hasPeaksValue && this.peaksValue.length && this.hasDurationValue) {
+    if (this.hasPeaksValue && this.peaksValue.length && this.durationValue > 0) {
       options.peaks = [this.peaksValue]
       options.duration = this.durationValue
     }

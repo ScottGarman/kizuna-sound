@@ -5,7 +5,7 @@
      data-controller="waveform"
      data-waveform-url-value="<%= rails_blob_path(sound.audio) %>"
      data-waveform-play-url-value="<%= play_sound_path(sound) %>"
-     <% if sound.waveform_peaks.present? %>
+     <% if sound.waveform_peaks.present? && sound.duration.to_f > 0 %>
        data-waveform-peaks-value="<%= sound.waveform_peaks.to_json %>"
        data-waveform-duration-value="<%= sound.duration %>"
      <% end %>>
