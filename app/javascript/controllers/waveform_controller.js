@@ -8,9 +8,14 @@ import WaveSurfer from "wavesurfer.js"
 //
 // The waveform is only created once the element scrolls into view, so a long
 // feed doesn't fetch and decode every audio file up front.
+//
+// When the server supplies precomputed peaks and duration, the waveform is
+// drawn from those and the audio file isn't downloaded until the listener hits
+// Play. Without them (e.g. a sound whose GenerateWaveformJob hasn't run yet),
+// wavesurfer falls back to fetching and decoding the whole file to draw it.
 export default class extends Controller {
   static targets = ["waveform", "playPause", "time", "speed"]
-  static values = { url: String, playUrl: String }
+  static values = { url: String, playUrl: String, peaks: Array, duration: Number }
 
   connect() {
     this.observer = new IntersectionObserver((entries) => {
@@ -31,7 +36,7 @@ export default class extends Controller {
   initWaveSurfer() {
     if (this.wavesurfer) return
 
-    this.wavesurfer = WaveSurfer.create({
+    const options = {
       container: this.waveformTarget,
       url: this.urlValue,
       height: 64,
@@ -41,7 +46,18 @@ export default class extends Controller {
       barWidth: 2,
       barGap: 1,
       barRadius: 2
-    })
+    }
+
+    // Passing both peaks and duration tells wavesurfer to render from them and
+    // defer loading the audio until playback, so the feed draws without
+    // downloading every file. wavesurfer expects one array of samples per
+    // channel; our peaks are mono.
+    if (this.hasPeaksValue && this.peaksValue.length && this.hasDurationValue) {
+      options.peaks = [this.peaksValue]
+      options.duration = this.durationValue
+    }
+
+    this.wavesurfer = WaveSurfer.create(options)
 
     this.wavesurfer.on("ready", () => this.updateTime())
     this.wavesurfer.on("timeupdate", () => this.updateTime())
