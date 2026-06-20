@@ -22,6 +22,9 @@ gem "jbuilder"
 # Pretty, slug-based URLs that hide database ids [https://github.com/norman/friendly_id]
 gem "friendly_id", "~> 5.5"
 
+# Used for pagination of the main feed [https://github.com/kaminari/kaminari]
+gem "kaminari", "~> 1.2"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
 

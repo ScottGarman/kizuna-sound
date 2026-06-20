@@ -77,6 +77,11 @@
       </li>
     <% end %>
   </ul>
+
+  <%# Hidden when everything fits on one page. Carries ?tag= through via params. %>
+  <nav class="mt-6 flex justify-center">
+    <%= paginate @sounds %>
+  </nav>
 <% elsif @active_tag %>
   <p class="text-gray-500">No sounds tagged “<%= @active_tag.name %>”.</p>
 <% else %>

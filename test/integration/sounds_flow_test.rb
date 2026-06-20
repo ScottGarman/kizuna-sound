@@ -310,6 +310,25 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
     assert_response :no_content
   end
 
+  test "feed paginates at 20 sounds per page" do
+    21.times do |i|
+      @admin.sounds.create!(title: "Paged #{format('%02d', i)}",
+                            audio: fixture_file_upload("sample.wav", "audio/wav"))
+    end
+
+    # First page shows the 20 newest and offers a link to the next page.
+    get root_path
+    assert_response :success
+    assert_select "ul.divide-y > li", count: 20
+    assert_select "a[rel='next']"
+
+    # The 21st (oldest) sound spills onto page 2.
+    get root_path(page: 2)
+    assert_response :success
+    assert_select "ul.divide-y > li", count: 1
+    assert_select "a[rel='prev']"
+  end
+
   test "play is resolvable via the friendly slug" do
     log_in
     post sounds_path, params: { sound: { title: "Sluggy Play", audio: @audio } }
