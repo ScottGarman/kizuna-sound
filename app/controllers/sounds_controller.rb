@@ -18,6 +18,10 @@ class SoundsController < ApplicationController
       # Tags that are actually in use (inner join), with a count for the filter list.
       @tags = Tag.joins(:taggings).group("tags.id").order(:name).select("tags.*, COUNT(taggings.id) AS sounds_count")
     end
+
+    # Paginate after all filtering so the 20-per-page limit applies to the
+    # filtered set. Kaminari's default per_page is set in its initializer.
+    @sounds = @sounds.page(params[:page])
   end
 
   def show
