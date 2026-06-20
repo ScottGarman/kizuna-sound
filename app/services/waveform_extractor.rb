@@ -45,15 +45,16 @@ class WaveformExtractor
   end
 
   # Raw little-endian signed 16-bit mono PCM on stdout, which we unpack to an
-  # array of integer samples.
+  # array of integer samples. stderr is captured (not leaked to the log) and
+  # surfaced in the error when ffmpeg can't read the file.
   def decode_samples
-    stdout, status = Open3.capture2(
+    stdout, stderr, status = Open3.capture3(
       "ffmpeg", "-v", "error", "-i", @path,
       "-ac", "1", "-ar", SAMPLE_RATE.to_s,
       "-f", "s16le", "-acodec", "pcm_s16le", "-",
       binmode: true
     )
-    raise ExtractionError, "ffmpeg failed to decode #{@path}" unless status.success?
+    raise ExtractionError, "ffmpeg failed to decode #{@path}: #{stderr.strip}" unless status.success?
 
     stdout.unpack("s<*")
   end
