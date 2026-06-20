@@ -1,7 +1,14 @@
+<%# When peaks + duration are present the player draws the waveform from them and
+    only fetches the audio on Play; otherwise it falls back to downloading the
+    file up front to compute the waveform (the pre-cache behavior). %>
 <div class="rounded-md border border-gray-200 bg-gray-50 px-4 py-3"
      data-controller="waveform"
      data-waveform-url-value="<%= rails_blob_path(sound.audio) %>"
-     data-waveform-play-url-value="<%= play_sound_path(sound) %>">
+     data-waveform-play-url-value="<%= play_sound_path(sound) %>"
+     <% if sound.waveform_peaks.present? && sound.duration.to_f > 0 %>
+       data-waveform-peaks-value="<%= sound.waveform_peaks.to_json %>"
+       data-waveform-duration-value="<%= sound.duration %>"
+     <% end %>>
   <div class="flex items-center gap-3">
     <button type="button"
             data-waveform-target="playPause"

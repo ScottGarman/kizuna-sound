@@ -1,6 +1,8 @@
 require "test_helper"
 
 class SoundsFlowTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup do
     @admin = users(:admin)
     @audio = fixture_file_upload("sample.wav", "audio/wav")
@@ -308,6 +310,41 @@ class SoundsFlowTest < ActionDispatch::IntegrationTest
       post play_sound_path(sound)
     end
     assert_response :no_content
+  end
+
+  test "once its waveform is generated, the feed serves a sound's peaks instead of forcing an audio download" do
+    log_in
+    perform_enqueued_jobs do
+      post sounds_path, params: { sound: { title: "Precomputed", audio: @audio } }
+    end
+    sound = Sound.order(:created_at).last
+    assert sound.waveform_peaks.present?, "expected GenerateWaveformJob to cache peaks"
+    reset!
+
+    get root_path
+    assert_response :success
+    # The player carries the cached peaks + duration, so wavesurfer renders the
+    # waveform without fetching the audio file up front.
+    assert_select "[data-controller='waveform'][data-waveform-peaks-value][data-waveform-duration-value]"
+  end
+
+  test "replacing a sound's audio regenerates its waveform" do
+    log_in
+    perform_enqueued_jobs do
+      post sounds_path, params: { sound: { title: "Re-encode me", audio: @audio } }
+    end
+    sound = Sound.order(:created_at).last
+    sound.update_columns(waveform_peaks: [ 0.42 ], duration: 99.0)
+
+    perform_enqueued_jobs do
+      patch sound_path(sound), params: {
+        sound: { title: "Re-encode me", audio: fixture_file_upload("sample.wav", "audio/wav") }
+      }
+    end
+
+    sound.reload
+    assert_not_equal [ 0.42 ], sound.waveform_peaks, "stale peaks should be replaced"
+    assert_not_equal 99.0, sound.duration
   end
 
   test "feed paginates at 20 sounds per page" do

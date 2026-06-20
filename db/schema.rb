@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_16_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_20_210840) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -72,11 +72,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_16_120000) do
   create_table "sounds", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
+    t.float "duration"
     t.integer "play_count", default: 0, null: false
     t.string "slug"
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.json "waveform_peaks"
     t.index ["slug"], name: "index_sounds_on_slug", unique: true
     t.index ["user_id"], name: "index_sounds_on_user_id"
   end
