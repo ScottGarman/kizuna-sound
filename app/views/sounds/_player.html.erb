@@ -11,10 +11,19 @@
      <% end %>>
   <div class="flex items-center gap-3">
     <button type="button"
+            aria-label="Play"
             data-waveform-target="playPause"
             data-action="waveform#togglePlay"
-            class="w-20 shrink-0 rounded-md bg-indigo-600 px-3 py-1.5 text-center text-sm font-medium text-white hover:bg-indigo-700 cursor-pointer">
-      Play
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white hover:bg-indigo-700 cursor-pointer">
+      <%# The icons are drawn from primitives rather than path data so the shapes
+          stay legible: play is a right-pointing triangle, pause is two bars. %>
+      <svg data-waveform-target="playIcon" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <polygon points="4,2 18,10 4,18" />
+      </svg>
+      <svg data-waveform-target="pauseIcon" class="hidden h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <rect x="3" y="2" width="5" height="16" rx="1" />
+        <rect x="12" y="2" width="5" height="16" rx="1" />
+      </svg>
     </button>
     <div data-waveform-target="waveform" class="min-w-0 flex-1"></div>
   </div>
