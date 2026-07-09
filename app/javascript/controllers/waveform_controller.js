@@ -14,7 +14,7 @@ import WaveSurfer from "wavesurfer.js"
 // Play. Without them (e.g. a sound whose GenerateWaveformJob hasn't run yet),
 // wavesurfer falls back to fetching and decoding the whole file to draw it.
 export default class extends Controller {
-  static targets = ["waveform", "playPause", "time", "speed"]
+  static targets = ["waveform", "playPause", "playIcon", "pauseIcon", "time", "speed"]
   static values = { url: String, playUrl: String, peaks: Array, duration: Number }
 
   connect() {
@@ -91,7 +91,11 @@ export default class extends Controller {
   }
 
   setPlaying(playing) {
-    if (this.hasPlayPauseTarget) this.playPauseTarget.textContent = playing ? "Pause" : "Play"
+    if (this.hasPlayIconTarget) this.playIconTarget.classList.toggle("hidden", playing)
+    if (this.hasPauseIconTarget) this.pauseIconTarget.classList.toggle("hidden", !playing)
+    if (this.hasPlayPauseTarget) {
+      this.playPauseTarget.setAttribute("aria-label", playing ? "Pause" : "Play")
+    }
   }
 
   updateTime() {
