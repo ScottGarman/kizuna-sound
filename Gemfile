@@ -49,9 +49,14 @@ gem "thruster", require: false
 gem "image_processing", "~> 2.0"
 # image_processing 2.0 made the image library a soft dependency, so name the
 # processor explicitly. We use libvips (Active Storage's default since Rails 7),
-# which is the library installed in the Dockerfile and CI. require: false lets
-# Active Storage load it on demand (as it did when it was a transitive dependency)
-# rather than at boot, so environments without libvips can still start.
+# which is the library installed in the Dockerfile and CI. require: false only
+# keeps Bundler from loading it up front; Active Storage still requires it during
+# boot whenever variant_processor is :vips, so the libvips system library has to
+# be installed or the app will not start. Active Storage does rescue a missing
+# libvips, but image_processing 2.0 rewrites that LoadError message and it no
+# longer matches the /libvips/ check the rescue dispatches on. Set
+# config.active_storage.variant_processor = :disabled for any environment that
+# genuinely lacks libvips.
 gem "ruby-vips", "~> 2.2", require: false
 
 group :development, :test do
