@@ -23,7 +23,7 @@ gem "jbuilder"
 gem "friendly_id", "~> 5.5"
 
 # Used for pagination of the main feed [https://github.com/kaminari/kaminari]
-gem "kaminari", "~> 1.2"
+gem "kaminari", "~> 1.3"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
