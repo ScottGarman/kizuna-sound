@@ -50,7 +50,7 @@ has been personally reviewed and understood by a human maintainer.
 
 ### Prerequisites
 
-- Ruby 4.0.3 (see [`.ruby-version`](.ruby-version))
+- Ruby 4.0 (see [`.ruby-version`](.ruby-version))
 - SQLite 3
 
 ### Setup
